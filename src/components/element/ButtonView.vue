@@ -10,19 +10,20 @@
         backgroundPositionX: -element.posx + 'px',
         backgroundPositionY: -element.posy + 'px'
       }"
-  >
-
-  </div>
+  />
+  <TextView v-bind:caption="element.caption" font="4" v-bind:x="element.x + element.offset" v-bind:y="element.y + 6"/>
 </template>
 
 <script>
 import data from "@/shared/data.json";
+import TextView from "@/components/element/TextView";
 
 export default {
   name: 'ButtonView',
-  props: ['id', 'skin', 'x', 'y'],
+  components: {TextView},
+  props: ['id', 'skin', 'x', 'y', 'caption', 'offset'],
   data() {
-    const element = data.elements[this.skin];
+    const element = data.elements[this.skin ? this.skin : 10];
 
     return {
       element: {
@@ -32,7 +33,9 @@ export default {
         x: Number.parseInt(this.x),
         y: Number.parseInt(this.y),
         posx: element['posx'],
-        posy: element['posy']
+        posy: element['posy'],
+        caption: this.caption ? this.caption : 'null',
+        offset: this.offset ? Number.parseInt(this.offset) : 5
       }
     };
   }

@@ -20,16 +20,23 @@ import data from '@/shared/data.json';
 
 export default {
   name: 'ElementView',
-  props: ['internalId', 'overrideWidth', 'overrideHeight', 'left', 'top', 'x', 'y'],
+  props: ['skin', 'overrideWidth', 'overrideHeight', 'left', 'top', 'x', 'y'],
   data() {
-    const element = data.elements[this.internalId];
+    const element = data.elements[this.skin];
     const width = Number.parseInt(this.overrideWidth ? this.overrideWidth : element['width']);
     const height = Number.parseInt(this.overrideHeight ? this.overrideHeight : element['height']);
 
     if (width <= element['width'] && height <= element['height']) {
       return {
         elements: [
-          {width: width, height: height, x: Number.parseInt(this.x), y: Number.parseInt(this.y), posx: element['posx'], posy: element['posy']}
+          {
+            width: width,
+            height: height,
+            x: Number.parseInt(this.x),
+            y: Number.parseInt(this.y),
+            posx: element['posx'],
+            posy: element['posy']
+          }
         ]
       };
     }
