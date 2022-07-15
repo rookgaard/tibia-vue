@@ -1,7 +1,7 @@
 <template>
   <div
       class="ui button"
-      id="%s"
+      v-bind:id="element.id"
       :style="{
         width: element.width + 'px',
         height: element.height + 'px',
@@ -20,13 +20,13 @@ import data from "@/shared/data.json";
 
 export default {
   name: 'ButtonView',
-  props: ['skin', 'x', 'y'],
+  props: ['id', 'skin', 'x', 'y'],
   data() {
     const element = data.elements[this.skin];
 
     return {
       element: {
-        text: this.text,
+        id: this.id,
         width: element.width,
         height: element.height,
         x: Number.parseInt(this.x),

@@ -10,11 +10,16 @@
       <ElementView internalId="6" x="115" y="5" override-height="161"/>
       <ElementView internalId="7" x="5" y="0" override-width="107"/>
       <ElementView internalId="8" x="5" y="169" override-width="108"/>
-      <ButtonView skin="10" x="16" y="16"/>
-      <ButtonView skin="10" x="16" y="46"/>
-      <ButtonView skin="10" x="16" y="76"/>
-      <ButtonView skin="10" x="16" y="106"/>
-      <ButtonView skin="10" x="16" y="136"/>
+      <ButtonView id="enter-game" skin="10" x="16" y="16"/>
+      <ButtonView id="access-account" skin="10" x="16" y="46"/>
+      <ButtonView id="options" skin="10" x="16" y="76"/>
+      <ButtonView id="info" skin="10" x="16" y="106"/>
+      <ButtonView id="exit-game" skin="10" x="16" y="136"/>
+      <TextView caption="Enter Game" font="4" x="35" y="22" />
+      <TextView caption="Access Account" font="4" x="35" y="52" />
+      <TextView caption="Options" font="4" x="35" y="82" />
+      <TextView caption="Info" font="4" x="35" y="112" />
+      <TextView caption="Exit Game" font="4" x="35" y="142" />
     </div>
   </div>
 </template>
@@ -22,10 +27,11 @@
 <script>
 import ElementView from "@/components/element/ElementView";
 import ButtonView from "@/components/element/ButtonView";
+import TextView from "@/components/element/TextView";
 
 export default {
   name: "LoginView",
-  components: {ButtonView, ElementView}
+  components: {TextView, ButtonView, ElementView}
 }
 </script>
 

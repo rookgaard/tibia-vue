@@ -25,14 +25,13 @@ export default {
     const element = data.elements[this.internalId];
     const width = Number.parseInt(this.overrideWidth ? this.overrideWidth : element['width']);
     const height = Number.parseInt(this.overrideHeight ? this.overrideHeight : element['height']);
-    console.warn(element, width, height);
 
     if (width <= element['width'] && height <= element['height']) {
       return {
         elements: [
           {width: width, height: height, x: Number.parseInt(this.x), y: Number.parseInt(this.y), posx: element['posx'], posy: element['posy']}
         ]
-      }
+      };
     }
 
     let elements = [];
@@ -53,7 +52,7 @@ export default {
             y: Number.parseInt(this.y) + (offsetY * element['height']),
             posx: element['posx'],
             posy: element['posy']
-          })
+          });
         }
 
         const restY = (height - repeatY * element['height']) % element['height'];
@@ -66,7 +65,7 @@ export default {
             y: Number.parseInt(this.y) + (offsetY * element['height']),
             posx: element['posx'],
             posy: element['posy']
-          })
+          });
         }
       }
 
@@ -82,7 +81,7 @@ export default {
             y: Number.parseInt(this.y) + (offsetY * element['height']),
             posx: element['posx'],
             posy: element['posy']
-          })
+          });
         }
 
         const restY = (height - repeatY * element['height']) % element['height'];
@@ -95,7 +94,7 @@ export default {
             y: Number.parseInt(this.y) + (offsetY * element['height']),
             posx: element['posx'],
             posy: element['posy']
-          })
+          });
         }
       }
     } else if (height > element['height']) {
@@ -110,7 +109,7 @@ export default {
           y: Number.parseInt(this.y) + (offset * element['height']),
           posx: element['posx'],
           posy: element['posy']
-        })
+        });
       }
 
       const rest = (height - repeat * element['height']) % element['height'];
@@ -123,7 +122,7 @@ export default {
           y: Number.parseInt(this.y) + (offset * element['height']),
           posx: element['posx'],
           posy: element['posy']
-        })
+        });
       }
     } else if (width > element['width']) {
       const repeat = Math.floor(width / element['width']);
@@ -137,7 +136,7 @@ export default {
           y: Number.parseInt(this.y),
           posx: element['posx'],
           posy: element['posy']
-        })
+        });
       }
 
       const rest = (width - repeat * element['width']) % element['width'];
@@ -150,15 +149,13 @@ export default {
           y: Number.parseInt(this.y),
           posx: element['posx'],
           posy: element['posy']
-        })
+        });
       }
     }
 
-    console.log(elements);
-
     return {
       elements: elements
-    }
+    };
   }
 }
 </script>
