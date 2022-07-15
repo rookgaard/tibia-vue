@@ -10,16 +10,22 @@
       <ElementView internalId="6" x="115" y="5" override-height="161"/>
       <ElementView internalId="7" x="5" y="0" override-width="107"/>
       <ElementView internalId="8" x="5" y="169" override-width="108"/>
+      <ButtonView skin="10" x="16" y="16"/>
+      <ButtonView skin="10" x="16" y="46"/>
+      <ButtonView skin="10" x="16" y="76"/>
+      <ButtonView skin="10" x="16" y="106"/>
+      <ButtonView skin="10" x="16" y="136"/>
     </div>
   </div>
 </template>
 
 <script>
 import ElementView from "@/components/element/ElementView";
+import ButtonView from "@/components/element/ButtonView";
 
 export default {
   name: "LoginView",
-  components: {ElementView}
+  components: {ButtonView, ElementView}
 }
 </script>
 
@@ -35,10 +41,6 @@ export default {
   height: 171px;
   left: 60px;
   bottom: 69px;
-  position: absolute;
-}
-.ui {
-  background-image: url('@/assets/ui.png');
   position: absolute;
 }
 </style>
