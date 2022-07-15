@@ -35,7 +35,11 @@
       <ButtonView id="restart" skin="20" x="177" y="148" caption="Restart" offset="5"/>
     </form>
     <div id="character-window">
-      <!--      <WindowView width="236" height="294" />-->
+      <WindowView width="236" height="294"/>
+      <TextView caption="Select Character" font="1" x="70" y="5"/>
+      <TextView caption="Select Character:" font="1" x="18" y="34"/>
+      <BorderView x="18" y="47" width="200" height="146"/>
+      <div id="characters"></div>
     </div>
   </div>
 </template>
@@ -45,10 +49,11 @@ import ElementView from "@/components/element/ElementView";
 import ButtonView from "@/components/element/ButtonView";
 import TextView from "@/components/element/TextView";
 import WindowView from "@/components/element/WindowView";
+import BorderView from "@/components/element/BorderView";
 
 export default {
   name: "LoginView",
-  components: {WindowView, TextView, ButtonView, ElementView}
+  components: {BorderView, WindowView, TextView, ButtonView, ElementView}
 }
 </script>
 
@@ -82,6 +87,12 @@ export default {
   position: absolute;
   left: 202px;
   top: 93px;
+}
+
+#characters {
+  position: absolute;
+  left: 19px;
+  top: 48px;
 }
 
 .tibia {
