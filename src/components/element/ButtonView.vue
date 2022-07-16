@@ -1,7 +1,8 @@
 <template>
   <div
       class="ui button"
-      v-bind:id="element.id"
+      :id="element.id"
+      @click="$emit('buttonClick')"
       :style="{
         width: element.width + 'px',
         height: element.height + 'px',
@@ -22,6 +23,7 @@ export default {
   name: 'ButtonView',
   components: {TextView},
   props: ['id', 'skin', 'x', 'y', 'caption', 'offset'],
+  emits: ['buttonClick'],
   data() {
     const element = data.elements[this.skin ? this.skin : 10];
 
