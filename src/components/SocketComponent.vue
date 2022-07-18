@@ -11,6 +11,15 @@ export default {
     },
     test: function (data) {
       console.log(data)
+    },
+    error: function (data) {
+      console.log('error', data);
+    },
+    characters: function (data) {
+      console.log('characters', data);
+    },
+    logged: function (mode) {
+      console.log(mode);
     }
   },
   mounted: function () {

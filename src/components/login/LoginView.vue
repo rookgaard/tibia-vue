@@ -22,15 +22,15 @@
       <TextView caption="Account Name" font="1" x="18" y="36"/>
       <input class="tibia tal"
              style="position: absolute;left: 132px;top: 32px;width: 86px;height: 16px;line-height: 14px;"
-             type="password" name="login"/>
+             type="password" name="login" v-model="inputLogin" />
       <TextView caption="Password" font="1" x="18" y="65"/>
       <input class="tibia tal"
              style="position: absolute;left: 132px;top: 61px;width: 86px;height: 16px;line-height: 14px;"
-             type="password" name="password"/>
+             type="password" name="password" v-model="inputPassword"/>
       <TextView caption="Character" font="1" x="18" y="90"/>
       <input class="tibia tal"
              style="position: absolute;left: 132px;top: 86px;width: 86px;height: 16px;line-height: 14px;" type="text"
-             name="name"/>
+             name="name" v-model="inputName"/>
       <ButtonView @buttonClick="login" id="login" skin="20" x="127" y="148" caption="Ok" offset="15"/>
       <ButtonView @buttonClick="cancelLogin" id="restart" skin="20" x="177" y="148" caption="Cancel" offset="5"/>
     </form>
@@ -60,6 +60,16 @@ export default {
       charactersShow: false
     }
   },
+  sockets: {
+    connect() {
+      console.log(this.$socket.id, 'socket connected');
+    },
+    characters: function (data) {
+      console.log('characters', data);
+      this.loginShow = false;
+      this.charactersShow = true;
+    }
+  },
   methods: {
     enter() {
       this.loginShow = true;
@@ -68,7 +78,7 @@ export default {
       this.loginShow = false;
     },
     login() {
-      console.log('login');
+      this.$socket.emit('login', this.inputLogin, this.inputPassword, '');
     }
   }
 }
