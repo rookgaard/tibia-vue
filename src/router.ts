@@ -1,6 +1,7 @@
 import {createRouter, createWebHashHistory} from 'vue-router'
-import HomeView from './views/HomeView.vue'
+import HomeView from './components/HomeView.vue'
 import LoginView from './components/login/LoginView.vue'
+import SocketComponent from './components/SocketComponent.vue'
 
 const router = createRouter({
 	history: createWebHashHistory(),
@@ -14,6 +15,11 @@ const router = createRouter({
 			path: '/login',
 			name: 'login',
 			component: LoginView
+		},
+		{
+			path: '/socket',
+			name: 'socket',
+			component: SocketComponent
 		}
 	]
 })
