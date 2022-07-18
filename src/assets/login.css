@@ -1,0 +1,75 @@
+#client {
+	width: 640px;
+	height: 480px;
+	background-image: url('@/assets/bg.png');
+	position: relative;
+}
+
+#button-area {
+	width: 117px;
+	height: 171px;
+	left: 60px;
+	bottom: 69px;
+	position: absolute;
+}
+
+#login-form {
+	width: 236px;
+	height: 178px;
+	position: absolute;
+	left: 202px;
+	top: 151px;
+}
+
+#character-window {
+	width: 236px;
+	height: 294px;
+	position: absolute;
+	left: 202px;
+	top: 93px;
+}
+
+#characters {
+	position: absolute;
+	left: 19px;
+	top: 48px;
+}
+
+.character-entry {
+	width: 184px;
+	height: 12px;
+	position: relative;
+	margin: 1px 1px 2px;
+}
+
+.character-entry.active {
+	background-color: rgb(112, 112, 112);
+}
+
+.tibia {
+	font-family: 'TibiaClient';
+	/*-webkit-text-stroke: 0px black;*/
+	color: white;
+	font-size: 8px;
+}
+
+.tal {
+	text-align: left;
+}
+
+input[type=password],
+input[type=text] {
+	background-color: rgb(54, 54, 54);
+	height: 16px;
+	border-image-slice: 1 fill;
+	border-image-width: 1px;
+	border-image-outset: 1px;
+	border-image-source: url('@/assets/input-border.png');
+	padding: 0;
+	border-width: 0;
+}
+
+@font-face {
+	font-family: 'TibiaClient';
+	src: url('@/assets/tibia-client.ttf') format('truetype');
+}

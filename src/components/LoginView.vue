@@ -22,7 +22,7 @@
       <TextView caption="Account Name" font="1" x="18" y="36"/>
       <input class="tibia tal"
              style="position: absolute;left: 132px;top: 32px;width: 86px;height: 16px;line-height: 14px;"
-             type="password" name="login" v-model="inputLogin" />
+             type="password" name="login" v-model="inputLogin"/>
       <TextView caption="Password" font="1" x="18" y="65"/>
       <input class="tibia tal"
              style="position: absolute;left: 132px;top: 61px;width: 86px;height: 16px;line-height: 14px;"
@@ -39,25 +39,35 @@
       <TextView caption="Select Character" font="1" x="70" y="5"/>
       <TextView caption="Select Character:" font="1" x="18" y="34"/>
       <BorderView x="18" y="47" width="200" height="146"/>
-      <div id="characters"></div>
+      <div id="characters">
+        <div
+            class="character-entry"
+            :class="{ active: character.active }"
+            v-for="character in characters"
+            :data-name="character.name"
+            :key="character.name"
+            @click="selectCharacter(character)"
+            @dblclick="loginCharacter(character)"
+        >
+          <TextView v-bind:caption="character.name" font="1" x="1" y="1"/>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import ElementView from "@/components/element/ElementView";
-import ButtonView from "@/components/element/ButtonView";
-import TextView from "@/components/element/TextView";
-import WindowView from "@/components/element/WindowView";
-import BorderView from "@/components/element/BorderView";
+import {ElementView, ButtonView, TextView, WindowView, BorderView} from '@/components/element'
+import router from "@/router";
 
 export default {
-  name: "LoginView",
+  name: 'LoginView',
   components: {BorderView, WindowView, TextView, ButtonView, ElementView},
   data() {
     return {
       loginShow: false,
-      charactersShow: false
+      charactersShow: false,
+      characters: [],
     }
   },
   sockets: {
@@ -68,6 +78,16 @@ export default {
       console.log('characters', data);
       this.loginShow = false;
       this.charactersShow = true;
+      this.characters = data;
+      this.characters.forEach((character) => {
+        character.active = false;
+      })
+    },
+    error: function (data) {
+      console.log(data);
+    },
+    message: function (data) {
+      console.log(data);
     }
   },
   methods: {
@@ -79,74 +99,19 @@ export default {
     },
     login() {
       this.$socket.emit('login', this.inputLogin, this.inputPassword, '');
+    },
+    selectCharacter(character) {
+      this.characters.forEach((character) => {
+        character.active = false;
+      })
+      character.active = true;
+    },
+    loginCharacter(character) {
+      this.$socket.emit('login', this.inputLogin, this.inputPassword, character.name);
+      router.push('game');
     }
   }
 }
 </script>
 
-<style scoped>
-#client {
-  width: 640px;
-  height: 480px;
-  background-image: url('@/assets/bg.png');
-  position: relative;
-}
-
-#button-area {
-  width: 117px;
-  height: 171px;
-  left: 60px;
-  bottom: 69px;
-  position: absolute;
-}
-
-#login-form {
-  width: 236px;
-  height: 178px;
-  position: absolute;
-  left: 202px;
-  top: 151px;
-}
-
-#character-window {
-  width: 236px;
-  height: 294px;
-  position: absolute;
-  left: 202px;
-  top: 93px;
-}
-
-#characters {
-  position: absolute;
-  left: 19px;
-  top: 48px;
-}
-
-.tibia {
-  font-family: 'TibiaClient';
-  /*-webkit-text-stroke: 0px black;*/
-  color: white;
-  font-size: 8px;
-}
-
-.tal {
-  text-align: left;
-}
-
-input[type=password],
-input[type=text] {
-  background-color: rgb(54, 54, 54);
-  height: 16px;
-  border-image-slice: 1 fill;
-  border-image-width: 1px;
-  border-image-outset: 1px;
-  border-image-source: url('@/assets/input-border.png');
-  padding: 0;
-  border-width: 0;
-}
-
-@font-face {
-  font-family: 'TibiaClient';
-  src: url('@/assets/tibia-client.ttf') format('truetype');
-}
-</style>
+<style scoped src="@/assets/login.css"/>
