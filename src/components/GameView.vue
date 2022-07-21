@@ -1,10 +1,8 @@
 <template>
-  <canvas id="canvas" width="640" height="512"></canvas>
+  <div>game</div>
 </template>
 
 <script>
-import LZString from 'lz-string'
-import {Canvas} from '@/shared/canvas';
 import {BufferReader} from '@/shared/bufferReader'
 import data from '@/shared/data.json'
 import {
@@ -40,13 +38,10 @@ import {
   setMapDescription,
   parseVipAdd,
 } from '@/shared/protocolParse';
-// const fabric = window.fabric;
 
 let buffer;
 let lastPos;
 let gameMap = [];
-const itemMap = JSON.parse(LZString.decompress(localStorage.getItem('itemMap')));
-let imagesMap = [];
 
 function parseBuffer(msg, length) {
   let opcode = -1;
@@ -162,14 +157,6 @@ export default {
   mounted: function () {
     console.log(Date());
     this.$socket.emit('login', process.env.VUE_APP_LOGIN, process.env.VUE_APP_PASSWORD, process.env.VUE_APP_NAME);
-    // const c = document.getElementById('canvas');
-    // const context = c.getContext('2d');
-    // Canvas.fillRect(1, 1, 1, 1);
-    // const img = new Image();
-    // img.src = 'https://usa.michal.es/big/items/3306.gif';
-    // imagesMap[3306] = img;
-    // console.log(imagesMap);
-    // context.drawImage(imagesMap[3306], 0, 0);
   }
 }
 </script>

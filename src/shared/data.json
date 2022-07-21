@@ -1663,18 +1663,18 @@
 	"ThingLastAttr": 255
   },
   "ThingType": {
-	"m_attribs": {},
+	"attributes": {},
 	"m_size": null,
-	"m_displacement": {},
-	"m_animationPhases": null,
-	"m_exactSize": null,
-	"m_realSize": null,
-	"m_numPatternX": null,
-	"m_numPatternY": null,
-	"m_numPatternZ": null,
-	"m_layers": null,
-	"m_elevation": null,
-	"m_spritesIndex": null
+	"displacement": {},
+	"animPh": null,
+	"exactSize": null,
+	"realSize": null,
+	"patX": null,
+	"patY": null,
+	"patZ": null,
+	"layers": null,
+	"elevation": null,
+	"sprites": null
   },
   "range": {
 	"left": 8,

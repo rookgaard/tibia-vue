@@ -7,6 +7,8 @@
     <router-link to="/socket">Socket</router-link>
     |
     <router-link to="/game">Game</router-link>
+    |
+    <router-link to="/test">Test</router-link>
   </nav>
   <router-view/>
 </template>

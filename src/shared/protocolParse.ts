@@ -435,7 +435,7 @@ function getCreature(msg: BufferReader, type: number) {
 	let id;
 //	console.log('getCreature', type);
 	const creature: unk = {
-		'type': 'creature'
+		'internalType': 'creature'
 	};
 
 	if (type === 0) {
@@ -502,30 +502,25 @@ function getStaticText(msg: BufferReader, id: number) {
 }
 
 function getItem(msg: BufferReader, id = 0) {
-	const item: unk = {
-		'type': 'item'
-	};
-
 	if (id === 0) {
 		id = msg.getUInt16();
 	}
-
-	item.id = id;
 
 	if (!itemMap[id]) {
 		console.error('brakuje itemu w itemMap', id);
 		return null;
 	}
 
-	if (itemMap[id].m_attribs[5] || itemMap[id].m_attribs[11]) {
-		msg.getByte();
+	if (itemMap[id].attributes) {
+		if (itemMap[id].attributes[5] || itemMap[id].attributes[11]) {
+			msg.getByte();
+		}
 	}
 
-	if (itemMap[id].serverId) {
-		item.id = itemMap[id].serverId;
-	}
+	itemMap[id].internalType = 'item';
+	itemMap[id].id = id;
 
-	return item;
+	return itemMap[id];
 }
 
 function addThing(gameMap: any, thing: any, position: any, stackPos: number) {
