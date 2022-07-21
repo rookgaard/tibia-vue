@@ -5,7 +5,7 @@ import VueSocketIO from 'vue-3-socket.io'
 
 const socket = new VueSocketIO({
 	debug: false,
-	connection: "http://10.254.0.174:3006",
+	connection: process.env.VUE_APP_PROXY_URL,
 });
 
 createApp(App).use(router).use(socket).mount('#app');

@@ -5,6 +5,8 @@
     <router-link to="/login">Login</router-link>
     |
     <router-link to="/socket">Socket</router-link>
+    |
+    <router-link to="/game">Game</router-link>
   </nav>
   <router-view/>
 </template>
