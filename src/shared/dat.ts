@@ -13,8 +13,6 @@ if (!localStorage.getItem('datFile')) {
 			parseDat(response.data);
 		}
 	);
-// } else {
-// 	console.log(JSON.parse(LZString.decompress(localStorage.getItem('datFile') ?? '') ?? ''));
 }
 
 function parseDat(content: Uint8Array) {
@@ -31,7 +29,7 @@ function parseDat(content: Uint8Array) {
 	const m_thingTypes = [];
 
 	for (let i = 0; i < itemCount; i++) {
-		const ThingTypePtr = JSON.parse(JSON.stringify(data.ThingType));
+		const thing = JSON.parse(JSON.stringify(data.ThingType));
 		let count = 0, attr = -1, done = false;
 
 		for (let j = 0; j < data.headers.ThingLastAttr; j++) {
@@ -45,9 +43,9 @@ function parseDat(content: Uint8Array) {
 
 			switch (attr) {
 				case data.headers.ThingAttrDisplacement: { // 24
-					ThingTypePtr.m_displacement.x = msg.getUInt16();
-					ThingTypePtr.m_displacement.y = msg.getUInt16();
-					ThingTypePtr.m_attribs[attr] = true;
+					thing.displacement.x = msg.getUInt16();
+					thing.displacement.y = msg.getUInt16();
+					thing.attributes[attr] = true;
 					break;
 				}
 				case data.headers.ThingAttrLight: { // 21
@@ -55,7 +53,7 @@ function parseDat(content: Uint8Array) {
 						intensity: msg.getUInt16(),
 						color: msg.getUInt16()
 					};
-					ThingTypePtr.m_attribs[attr] = light;
+					thing.attributes[attr] = light;
 					break;
 				}
 				case data.headers.ThingAttrMarket: { // 33
@@ -70,12 +68,12 @@ function parseDat(content: Uint8Array) {
 					market.name = msg.getString();
 					market.restrictVocation = msg.getUInt16();
 					market.requiredLevel = msg.getUInt16();
-					ThingTypePtr.m_attribs[attr] = market;
+					thing.attributes[attr] = market;
 					break;
 				}
 				case data.headers.ThingAttrElevation: { // 25
-					ThingTypePtr.m_elevation = msg.getUInt16();
-					ThingTypePtr.m_attribs[attr] = ThingTypePtr.m_elevation;
+					thing.elevation = msg.getUInt16();
+					thing.attributes[attr] = thing.elevation;
 					break;
 				}
 				case data.headers.ThingAttrGround: // 0
@@ -86,11 +84,11 @@ function parseDat(content: Uint8Array) {
 				case data.headers.ThingAttrCloth: // 32
 				case data.headers.ThingAttrUsable: // 34
 				{
-					ThingTypePtr.m_attribs[attr] = msg.getUInt16();
+					thing.attributes[attr] = msg.getUInt16();
 					break;
 				}
 				default: {
-					ThingTypePtr.m_attribs[attr] = true;
+					thing.attributes[attr] = true;
 					break;
 				}
 			}
@@ -101,44 +99,44 @@ function parseDat(content: Uint8Array) {
 		}
 
 		const groupCount = 1;
-		ThingTypePtr.m_animationPhases = 0;
+		thing.animPh = 0;
 		let totalSpritesCount = 0;
 
 		for (let j = 0; j < groupCount; ++j) {
 			const width = msg.getByte();
 			const height = msg.getByte();
-			ThingTypePtr.m_size = [width, height];
+			thing.m_size = [width, height];
 
 			if (width > 1 || height > 1) {
-				ThingTypePtr.m_realSize = msg.getByte();
-				ThingTypePtr.m_exactSize = Math.min(ThingTypePtr.m_realSize, Math.max(width * 32, height * 32));
+				thing.realSize = msg.getByte();
+				thing.exactSize = Math.min(thing.realSize, Math.max(width * 32, height * 32));
 			} else {
-				ThingTypePtr.m_exactSize = 32;
+				thing.exactSize = 32;
 			}
 
-			ThingTypePtr.m_layers = msg.getByte();
-			ThingTypePtr.m_numPatternX = msg.getByte();
-			ThingTypePtr.m_numPatternY = msg.getByte();
-			ThingTypePtr.m_numPatternZ = msg.getByte();
+			thing.layers = msg.getByte();
+			thing.patX = msg.getByte();
+			thing.patY = msg.getByte();
+			thing.patZ = msg.getByte();
 			const groupAnimationsPhases = msg.getByte();
-			ThingTypePtr.m_animationPhases += groupAnimationsPhases;
+			thing.animPh += groupAnimationsPhases;
 
-			const totalSprites = ThingTypePtr.m_size[0] * ThingTypePtr.m_size[1] * ThingTypePtr.m_layers * ThingTypePtr.m_numPatternX * ThingTypePtr.m_numPatternY * ThingTypePtr.m_numPatternZ * groupAnimationsPhases;
+			const totalSprites = thing.m_size[0] * thing.m_size[1] * thing.layers * thing.patX * thing.patY * thing.patZ * groupAnimationsPhases;
 
 			if ((totalSpritesCount + totalSprites) > 4096) {
 				console.log("a thing type has more than 4096 sprites", totalSpritesCount, totalSpritesCount + totalSprites);
 			}
 
-			ThingTypePtr.m_spritesIndex = new Array((totalSpritesCount + totalSprites));
+			thing.sprites = new Array((totalSpritesCount + totalSprites));
 
 			for (let k = totalSpritesCount; k < (totalSpritesCount + totalSprites); k++) {
-				ThingTypePtr.m_spritesIndex[k] = msg.getUInt16();
+				thing.sprites[k] = msg.getUInt16();
 			}
 
 			totalSpritesCount += totalSprites;
 		}
 
-		m_thingTypes[i + 100] = ThingTypePtr;
+		m_thingTypes[i + 100] = thing;
 	}
 
 	localStorage.setItem('datFile', LZString.compress(JSON.stringify(m_thingTypes)));
