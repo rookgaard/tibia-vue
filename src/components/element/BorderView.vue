@@ -1,11 +1,11 @@
 <template>
-  <ElementView skin="23" v-bind:x="element.x" v-bind:y="element.y" v-bind:override-width="element.width"/>
+  <ElementView skin="23" v-bind:x="element.x" v-bind:y="element.y" v-bind:override-width="element.width"/> <!-- top -->
   <ElementView skin="24" v-bind:x="element.x" v-bind:y="element.y + 1" override-width="1"
-               v-bind:override-height="element.height - 1"/>
+               v-bind:override-height="element.height - 1"/> <!-- left -->
   <ElementView skin="21" v-bind:x="element.x + element.width - 1" v-bind:y="element.y + 1" override-width="1"
-               v-bind:override-height="element.height - 1"/>
+               v-bind:override-height="element.height - 1"/> <!-- right -->
   <ElementView skin="22" v-bind:x="element.x + 1" v-bind:y="element.y + element.height - 1"
-               v-bind:override-width="element.width - 2"/>
+               v-bind:override-width="element.width - 2"/> <!-- bottom -->
   <div
       :style="{
         position: 'absolute',
@@ -18,10 +18,10 @@
 </template>
 
 <script>
-import ElementView from "@/components/element/ElementView";
+import ElementView from '@/components/element/ElementView';
 
 export default {
-  name: "BorderView",
+  name: 'BorderView',
   components: {ElementView},
   props: ['x', 'y', 'width', 'height'],
   data() {
@@ -36,7 +36,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

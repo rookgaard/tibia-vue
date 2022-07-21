@@ -58,7 +58,7 @@
 
 <script>
 import {ElementView, ButtonView, TextView, WindowView, BorderView} from '@/components/element'
-import router from "@/router";
+import router from '@/router';
 
 export default {
   name: 'LoginView',
@@ -71,23 +71,13 @@ export default {
     }
   },
   sockets: {
-    connect() {
-      console.log(this.$socket.id, 'socket connected');
-    },
     characters: function (data) {
-      console.log('characters', data);
       this.loginShow = false;
       this.charactersShow = true;
       this.characters = data;
       this.characters.forEach((character) => {
         character.active = false;
       })
-    },
-    error: function (data) {
-      console.log(data);
-    },
-    message: function (data) {
-      console.log(data);
     }
   },
   methods: {

@@ -16,8 +16,8 @@
 </template>
 
 <script>
-import data from "@/shared/data.json";
-import TextView from "@/components/element/TextView";
+import data from '@/shared/data.json';
+import TextView from '@/components/element/TextView';
 
 export default {
   name: 'ButtonView',
@@ -25,7 +25,7 @@ export default {
   props: ['id', 'skin', 'x', 'y', 'caption', 'offset'],
   emits: ['buttonClick'],
   data() {
-    const element = data.elements[this.skin ? this.skin : 10];
+    const element = data.elements[this.skin || 10];
 
     return {
       element: {
@@ -36,7 +36,7 @@ export default {
         y: Number.parseInt(this.y),
         posx: element['posx'],
         posy: element['posy'],
-        caption: this.caption ? this.caption : 'null',
+        caption: this.caption || 'null',
         offset: this.offset ? Number.parseInt(this.offset) : 5
       }
     };

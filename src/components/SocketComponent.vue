@@ -12,11 +12,14 @@ export default {
     test: function (data) {
       console.log(data)
     },
+    message: function (data) {
+      console.log(data)
+    },
     error: function (data) {
-      console.log('error', data);
+      console.log(data);
     },
     characters: function (data) {
-      console.log('characters', data);
+      console.log(data);
     },
     logged: function (mode) {
       console.log(mode);
