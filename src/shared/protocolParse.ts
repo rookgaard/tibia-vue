@@ -1,19 +1,25 @@
 import {BufferReader} from '@/shared/bufferReader';
-import LZString from "lz-string";
+import LZString from 'lz-string';
+import '@/shared/dat';
+import {GameMap} from '@/shared/gameMap';
+import {Position} from '@/shared/position';
+import {Thing} from '@/shared/thing';
 
-// const itemMap = JSON.parse(LZString.decompress(localStorage.getItem('itemMap') ?? '') ?? '');
-const itemMap = JSON.parse(LZString.decompress(localStorage.getItem('datFile') ?? '') ?? '');
+let itemMap: any;
+
+function loadItemMap() {
+	try {
+		itemMap = JSON.parse(LZString.decompress(localStorage.getItem('datFile') ?? '') ?? '');
+	} catch (e) {
+		setTimeout(loadItemMap, 100);
+	}
+}
+
+loadItemMap();
+
 type unk = {
 	[key: string]: any;
 };
-
-function getPosition(msg: BufferReader) {
-	return {
-		x: msg.getUInt16(),
-		y: msg.getUInt16(),
-		z: msg.getByte()
-	};
-}
 
 //10
 function parseLogin(msg: BufferReader) {
@@ -26,38 +32,65 @@ function parseLogin(msg: BufferReader) {
 function parseLoginWait(msg: BufferReader) {
 	const message = msg.getString();
 	const time = msg.getByte();
-	console.log('parseLoginWait', message, time);
+	console.log(message, time);
 }
 
 //105
-function parseUpdateTile(msg: BufferReader, gameMap: any) {
-	const pos = getPosition(msg);
-	setTileDescription(msg, gameMap, pos);
+function parseUpdateTile(msg: BufferReader, gameMap: GameMap) {
+	const tilePos = getPosition(msg);
+	setTileDescription(msg, gameMap, tilePos);
 }
 
 //106
-function parseTileAddThing(msg: BufferReader) {
-	getPosition(msg);
-	msg.getByte(); //stackPos
-	getThing(msg);
+function parseTileAddThing(msg: BufferReader, gameMap: GameMap) {
+	const pos = getPosition(msg);
+	const stackPos = msg.getByte();
+	const thing = getThing(msg, gameMap);
+	gameMap.addThing(thing, pos, stackPos);
 }
 
 //107
-function parseTileTransformThing(msg: BufferReader) {
-	getMappedThing(msg);
-	getThing(msg);
+function parseTileTransformThing(msg: BufferReader, gameMap: GameMap) {
+	const thing = getMappedThing(msg, gameMap);
+	const newThing = getThing(msg, gameMap);
+
+	if (!thing) {
+		return console.log('no thing');
+	}
+
+	const pos = thing.position;
+	const stackPos = thing.stackPos;
+	gameMap.removeThing(pos, stackPos);
+	gameMap.addThing(newThing, pos, stackPos);
 }
 
 //108
-function parseTileRemoveThing(msg: BufferReader) {
-	getMappedThing(msg);
+function parseTileRemoveThing(msg: BufferReader, gameMap: GameMap) {
+	const thing = getMappedThing(msg, gameMap);
+
+	if (!thing) {
+		return console.log('no thing');
+	}
+
+	const pos = thing.position;
+	const stackPos = thing.stackPos;
+	gameMap.removeThing(pos, stackPos);
 }
 
 //109
-function parseCreatureMove(msg: BufferReader) {
-	getMappedThing(msg);
-	getPosition(msg);
-//	console.log('parseCreatureMove', lastPos);
+function parseCreatureMove(msg: BufferReader, gameMap: GameMap) {
+	const thing = getMappedThing(msg, gameMap);
+	const newPos = getPosition(msg);
+
+	if (!thing) {
+		return console.log('no creature found to move');
+	}
+
+	const pos = thing.position;
+	const stackPos = thing.stackPos;
+	gameMap.removeThing(pos, stackPos);
+	thing.data.direction = pos.getDirectionFromPositions(newPos, true);
+	gameMap.addThing(thing, newPos, -1);
 }
 
 //110
@@ -75,32 +108,40 @@ function parseOpenContainer(msg: BufferReader) {
 
 //111
 function parseCloseContainer(msg: BufferReader) {
-	msg.getByte(); //containerId
+	return msg.getByte(); //containerId
 }
 
 //112
 function parseContainerAddItem(msg: BufferReader) {
-	msg.getByte(); //containerId
-	getItem(msg);
+	return {
+		containerId: msg.getByte(),
+		item: getItem(msg)
+	};
 }
 
 //113
 function parseContainerUpdateItem(msg: BufferReader) {
-	msg.getByte(); //containerId
-	msg.getByte(); //slot
-	getItem(msg);
+	return {
+		containerId: msg.getByte(),
+		slot: msg.getByte(),
+		item: getItem(msg)
+	};
 }
 
 //114
 function parseContainerRemoveItem(msg: BufferReader) {
-	msg.getByte(); //containerId
-	msg.getByte(); //slot
+	return {
+		containerId: msg.getByte(),
+		slot: msg.getByte()
+	};
 }
 
 //120
 function parseAddInventoryItem(msg: BufferReader) {
-	msg.getByte(); //slot
-	getItem(msg);
+	return {
+		slot: msg.getByte(),
+		item: getItem(msg)
+	};
 }
 
 //121
@@ -132,58 +173,72 @@ function parseWorldLight(msg: BufferReader) {
 
 //131
 function parseMagicEffect(msg: BufferReader) {
-	getPosition(msg);
-	msg.getByte(); // type
+	return {
+		position: getPosition(msg),
+		effect: msg.getByte()
+	};
 }
 
 //132
 function parseAnimatedText(msg: BufferReader) {
-	const position = getPosition(msg);
-	const color = msg.getByte();
-	const text = msg.getString();
+	return {
+		position: getPosition(msg),
+		color: msg.getByte(),
+		text: msg.getString()
+	};
 }
 
 //134
 function parseCreatureMark(msg: BufferReader) {
-	const id = msg.getUInt32();
-	const color = msg.getByte();
+	return {
+		id: msg.getUInt32(),
+		color: msg.getByte()
+	};
 }
 
 //140
 function parseCreatureHealth(msg: BufferReader) {
-	const id = msg.getUInt32();
-	const healthPercent = msg.getByte();
+	return {
+		id: msg.getUInt32(),
+		healthPercent: msg.getByte()
+	};
 }
 
 //141
 function parseCreatureLight(msg: BufferReader) {
-	msg.getUInt32(); // id
-	const light = {
-		intensity: msg.getByte(),
-		color: msg.getByte()
+	return {
+		id: msg.getUInt32(),
+		light: {
+			intensity: msg.getByte(),
+			color: msg.getByte()
+		}
 	};
 }
 
 //143
 function parseCreatureSpeed(msg: BufferReader) {
-	msg.getUInt32(); // id
-	msg.getUInt16(); // speed
+	return {
+		id: msg.getUInt32(),
+		speed: msg.getUInt16()
+	};
 }
 
 //160
 function parsePlayerStats(msg: BufferReader) {
-	msg.getUInt16(); // health
-	msg.getUInt16(); // maxHealth
-	msg.getUInt32(); // free capacity
-	msg.getUInt32(); // experience
-	msg.getUInt16(); // level
-	msg.getByte(); // level percent
-	msg.getUInt16(); // mana
-	msg.getUInt16(); // maxMana
-	msg.getByte(); // magic level
-	msg.getByte(); // magic level percent
-	msg.getByte(); // soul
-	msg.getUInt16(); // stamina
+	return {
+		health: msg.getUInt16(),
+		maxHealth: msg.getUInt16(),
+		capacity: msg.getUInt32(),
+		experience: msg.getUInt32(),
+		level: msg.getUInt16(),
+		levelPercent: msg.getByte(),
+		mana: msg.getUInt16(),
+		maxMana: msg.getUInt16(),
+		magicLevel: msg.getByte(),
+		magicLevelPercent: msg.getByte(),
+		soul: msg.getByte(),
+		stamina: msg.getUInt16()
+	};
 }
 
 //161
@@ -196,7 +251,7 @@ function parsePlayerSkills(msg: BufferReader) {
 
 //162
 function parsePlayerIcons(msg: BufferReader) {
-	msg.getUInt16(); // icons
+	return msg.getUInt16(); // icons
 }
 
 //170
@@ -256,7 +311,7 @@ function parseOpenChannel(msg: BufferReader) {
 //180
 function parseTextMessage(msg: BufferReader) {
 	const mode = msg.getByte();
-	console.log(`parseTextMessage, mode: ${mode}`);
+	console.log(`mode: ${mode}`);
 	let text;
 
 	switch (mode) {
@@ -311,24 +366,7 @@ function parseVipAdd(msg: BufferReader) {
 	const status = msg.getByte();
 }
 
-function getMappedThing(msg: BufferReader) {
-	const x = msg.getUInt16();
-//		console.log('getMappedThing x', x);
-
-	if (x !== 0xffff) {
-		const msgPosition = [
-			x,
-			msg.getUInt16(),
-			msg.getByte(),
-			msg.getByte()
-		];
-//			console.log(msgPosition);
-	} else {
-//			console.log(msg.getUInt32());
-	}
-}
-
-function setMapDescription(msg: BufferReader, gameMap: any, x: number, y: number, z: number, width: number, height: number) {
+function setMapDescription(msg: BufferReader, gameMap: GameMap, x: number, y: number, z: number, width: number, height: number) {
 	let startz;
 	let endz;
 	let zstep;
@@ -350,18 +388,15 @@ function setMapDescription(msg: BufferReader, gameMap: any, x: number, y: number
 	}
 }
 
-function setFloorDescription(msg: BufferReader, gameMap: any, x: number, y: number, z: number, width: number, height: number, offset: number, skip: number) {
+function setFloorDescription(msg: BufferReader, gameMap: GameMap, x: number, y: number, z: number, width: number, height: number, offset: number, skip: number) {
 	for (let nx = 0; nx < width; nx++) {
 		for (let ny = 0; ny < height; ny++) {
-			const tilePos = {x: x + nx + offset, y: y + ny + offset, z: z};
+			const tilePos = new Position(x + nx + offset, y + ny + offset, z);
 
 			if (skip === 0) {
 				skip = setTileDescription(msg, gameMap, tilePos);
 			} else {
-				if (gameMap[tilePos.z]) {
-					delete gameMap[tilePos.z][tilePos.y + '_' + tilePos.x];
-				}
-
+				gameMap.removeTile(tilePos);
 				skip--;
 			}
 		}
@@ -370,12 +405,8 @@ function setFloorDescription(msg: BufferReader, gameMap: any, x: number, y: numb
 	return skip;
 }
 
-function setTileDescription(msg: BufferReader, gameMap: any, position: any) {
-	if (gameMap[position.z]) {
-		delete gameMap[position.z][position.y + '_' + position.x];
-	}
-
-	const gotEffect = false;
+function setTileDescription(msg: BufferReader, gameMap: GameMap, position: Position) {
+	gameMap.removeTile(position);
 
 	for (let stackPos = 0; stackPos < 256; stackPos++) {
 		const peek = msg.peekUInt16();
@@ -385,31 +416,14 @@ function setTileDescription(msg: BufferReader, gameMap: any, position: any) {
 		}
 
 		if (stackPos > 10) {
-			console.error('too many things');
+			console.error('too many things on a tile');
 		}
 
-		const thing = getThing(msg);
-		addThing(gameMap, thing, position, stackPos);
+		const thing = getThing(msg, gameMap);
+		gameMap.addThing(thing, position, stackPos);
 	}
 
 	return 0;
-}
-
-function getThing(msg: BufferReader) {
-	let thing;
-	const id = msg.getUInt16();
-
-	if (id === 0) {
-		console.log('invalid thing id');
-	} else if (id === 97 || id === 98 || id === 99) {
-		thing = getCreature(msg, id);
-	} else if (id === 96) { // otclient only
-		thing = getStaticText(msg, id);
-	} else {
-		thing = getItem(msg, id);
-	}
-
-	return thing;
 }
 
 function getOutfit(msg: BufferReader) {
@@ -430,60 +444,86 @@ function getOutfit(msg: BufferReader) {
 	return outfit;
 }
 
-function getCreature(msg: BufferReader, type: number) {
-	let creatureType;
-	let id;
-//	console.log('getCreature', type);
-	const creature: unk = {
-		'internalType': 'creature'
-	};
+function getThing(msg: BufferReader, gameMap: GameMap): Thing {
+	const id = msg.getUInt16();
+
+	if (id === 0) {
+		throw new Error('invalid thing id');
+	} else if (id === 97 || id === 98 || id === 99) {
+		return getCreature(msg, gameMap, id);
+	} else if (id === 96) { // otclient only
+		return getStaticText(msg, id);
+	} else {
+		return getItem(msg, id);
+	}
+}
+
+function getMappedThing(msg: BufferReader, gameMap: GameMap): Thing | null {
+	const x = msg.getUInt16();
+
+	if (x !== 0xffff) {
+		const position = new Position(x, msg.getUInt16(), msg.getByte());
+		const stackPos = msg.getByte();
+		return gameMap.getThing(position, stackPos);
+	} else {
+		return gameMap.getCreatureById(msg.getUInt32());
+	}
+}
+
+function getCreature(msg: BufferReader, gameMap: GameMap, type: number): Thing {
+	let creature = new Thing();
+	creature.type = 'creature';
 
 	if (type === 0) {
 		type = msg.getUInt16();
 	}
 
 	const known = (type !== 97);
+	creature.data.known = known;
 
 	if (type === 98 || type === 97) {
 		if (known) {
-			id = msg.getUInt32();
+			const id = msg.getUInt32();
+			creature = gameMap.getCreatureById(id);
+			creature.id = id;
 		} else {
-			const removeId = msg.getUInt32();
-			id = msg.getUInt32();
+			creature.data.removeId = msg.getUInt32();
+			creature.id = msg.getUInt32();
 
-			if (id >= 0x10000000 && id < 0x40000000)
-				creatureType = 0;
-			else if (id >= 0x40000000 && id < 0x80000000)
-				creatureType = 1;
-			else
-				creatureType = 2;
+			if (creature.id >= 0x10000000 && creature.id < 0x40000000) {
+				creature.data.creatureType = 0;
+			} else if (creature.id >= 0x40000000 && creature.id < 0x80000000) {
+				creature.data.creatureType = 1;
+			} else {
+				creature.data.creatureType = 2;
+			}
 
-			creature.name = msg.getString();
+			creature.data.name = msg.getString();
 		}
 
-		creature.healthPercent = msg.getByte();
-		creature.direction = msg.getByte();
-		creature.outfit = getOutfit(msg);
-		const light = {
+		creature.data.healthPercent = msg.getByte();
+		creature.data.direction = msg.getByte();
+		creature.data.outfit = getOutfit(msg);
+		creature.data.light = {
 			intensity: msg.getByte(),
 			color: msg.getByte()
 		};
-		msg.getUInt16(); //speed
-		msg.getByte(); //skull
-		msg.getByte(); //shield
+		creature.data.speed = msg.getUInt16();
+		creature.data.skull = msg.getByte();
+		creature.data.shield = msg.getByte();
 
 		// emblem is sent only when the creature is not known
-		let emblem = -1;
-		creatureType = -1;
+		creature.data.emblem = -1;
 
-		if (true && !known) {
-			emblem = msg.getByte();
+		if (!known) {
+			creature.data.emblem = msg.getByte();
 		}
 
-		const unpass = msg.getByte();
+		creature.data.unpass = msg.getByte();
 	} else if (type === 99) {
-		id = msg.getUInt32();
-		creature.direction = msg.getByte();
+		const id = msg.getUInt32();
+		creature = gameMap.getCreatureById(id);
+		creature.data.direction = msg.getByte();
 	} else {
 		console.error('invalid creature opcode');
 	}
@@ -491,24 +531,13 @@ function getCreature(msg: BufferReader, type: number) {
 	return creature;
 }
 
-function getStaticText(msg: BufferReader, id: number) {
-//		console.log('getStaticText', id);
-	let text;
-
-	const colorByte = msg.getByte();
-//    std::string fontName = msg.getString();
-//    std::string text = msg.getString();
-	return text;
-}
-
-function getItem(msg: BufferReader, id = 0) {
+function getItem(msg: BufferReader, id = 0): Thing {
 	if (id === 0) {
 		id = msg.getUInt16();
 	}
 
 	if (!itemMap[id]) {
 		console.error('brakuje itemu w itemMap', id);
-		return null;
 	}
 
 	if (itemMap[id].attributes) {
@@ -517,24 +546,30 @@ function getItem(msg: BufferReader, id = 0) {
 		}
 	}
 
-	itemMap[id].internalType = 'item';
-	itemMap[id].id = id;
+	const thing = new Thing();
+	thing.id = id;
+	thing.type = 'item';
+	thing.data = itemMap[id];
 
-	return itemMap[id];
+	return thing;
 }
 
-function addThing(gameMap: any, thing: any, position: any, stackPos: number) {
-	if (!gameMap[position.z]) {
-		gameMap[position.z] = {};
-	}
+function getStaticText(msg: BufferReader, id: number): Thing {
+	const thing = new Thing();
+	thing.id = id;
+	thing.type = 'staticText';
 
-	const positionKey = position.y + '_' + position.x;
+	thing.data = {
+		colorByte: msg.getByte(),
+		fontName: msg.getString(),
+		text: msg.getString()
+	};
 
-	if (!gameMap[position.z][positionKey]) {
-		gameMap[position.z][positionKey] = [];
-	}
+	return thing;
+}
 
-	gameMap[position.z][positionKey][stackPos] = thing;
+function getPosition(msg: BufferReader) {
+	return new Position(msg.getUInt16(), msg.getUInt16(), msg.getByte());
 }
 
 export {
