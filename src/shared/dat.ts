@@ -3,7 +3,10 @@ import axios from 'axios'
 import {BufferReader} from '@/shared/bufferReader'
 import data from '@/shared/data.json'
 
-if (!localStorage.getItem('datFile')) {
+try {
+	// localStorage.removeItem('datFile');
+	JSON.parse(LZString.decompress(localStorage.getItem('datFile') ?? '') ?? '');
+} catch (e) {
 	axios({
 		url: 'https://client.rookgaard.pl/860/Tibia.dat',
 		method: 'GET',
@@ -17,23 +20,20 @@ if (!localStorage.getItem('datFile')) {
 
 function parseDat(content: Uint8Array) {
 	const msg = new BufferReader(content);
-	msg.skipBytes(4);
+	msg.skipBytes(4); // signature
 	const itemCount = msg.getUInt16();
-	msg.skipBytes(6);
+	msg.skipBytes(6); // other categories
 
-	const output = [];
-	// let id = 100;
 	type unk = {
 		[key: string]: any;
 	};
-	const m_thingTypes = [];
+	const things = [];
 
 	for (let i = 0; i < itemCount; i++) {
 		const thing = JSON.parse(JSON.stringify(data.ThingType));
-		let count = 0, attr = -1, done = false;
+		let attr = -1, done = false;
 
 		for (let j = 0; j < data.headers.ThingLastAttr; j++) {
-			count++;
 			attr = msg.getByte();
 
 			if (attr === data.headers.ThingLastAttr) {
@@ -49,11 +49,10 @@ function parseDat(content: Uint8Array) {
 					break;
 				}
 				case data.headers.ThingAttrLight: { // 21
-					const light = {
+					thing.attributes[attr] = {
 						intensity: msg.getUInt16(),
 						color: msg.getUInt16()
 					};
-					thing.attributes[attr] = light;
 					break;
 				}
 				case data.headers.ThingAttrMarket: { // 33
@@ -95,7 +94,7 @@ function parseDat(content: Uint8Array) {
 		}
 
 		if (!done) {
-			console.log(`corrupt data (i: ${i}, count: ${count}, lastAttr: ${attr})`);
+			console.log(`corrupted data (i: ${i}, lastAttr: ${attr})`);
 		}
 
 		const groupCount = 1;
@@ -103,13 +102,12 @@ function parseDat(content: Uint8Array) {
 		let totalSpritesCount = 0;
 
 		for (let j = 0; j < groupCount; ++j) {
-			const width = msg.getByte();
-			const height = msg.getByte();
-			thing.m_size = [width, height];
+			thing.width = msg.getByte();
+			thing.height = msg.getByte();
 
-			if (width > 1 || height > 1) {
+			if (thing.width > 1 || thing.height > 1) {
 				thing.realSize = msg.getByte();
-				thing.exactSize = Math.min(thing.realSize, Math.max(width * 32, height * 32));
+				thing.exactSize = Math.min(thing.realSize, Math.max(thing.width * 32, thing.height * 32));
 			} else {
 				thing.exactSize = 32;
 			}
@@ -121,7 +119,7 @@ function parseDat(content: Uint8Array) {
 			const groupAnimationsPhases = msg.getByte();
 			thing.animPh += groupAnimationsPhases;
 
-			const totalSprites = thing.m_size[0] * thing.m_size[1] * thing.layers * thing.patX * thing.patY * thing.patZ * groupAnimationsPhases;
+			const totalSprites = thing.width * thing.height * thing.layers * thing.patX * thing.patY * thing.patZ * groupAnimationsPhases;
 
 			if ((totalSpritesCount + totalSprites) > 4096) {
 				console.log("a thing type has more than 4096 sprites", totalSpritesCount, totalSpritesCount + totalSprites);
@@ -136,8 +134,8 @@ function parseDat(content: Uint8Array) {
 			totalSpritesCount += totalSprites;
 		}
 
-		m_thingTypes[i + 100] = thing;
+		things[i + 100] = thing;
 	}
 
-	localStorage.setItem('datFile', LZString.compress(JSON.stringify(m_thingTypes)));
+	localStorage.setItem('datFile', LZString.compress(JSON.stringify(things)));
 }
