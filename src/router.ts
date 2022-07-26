@@ -1,5 +1,5 @@
 import {createRouter, createWebHashHistory} from 'vue-router'
-import {HomeView, LoginView, SocketComponent, GameView} from '@/components'
+import {HomeView, LoginView, GameView} from '@/components'
 
 const router = createRouter({
 	history: createWebHashHistory(),
@@ -13,11 +13,6 @@ const router = createRouter({
 			path: '/login',
 			name: 'login',
 			component: LoginView
-		},
-		{
-			path: '/socket',
-			name: 'socket',
-			component: SocketComponent
 		},
 		{
 			path: '/game',
