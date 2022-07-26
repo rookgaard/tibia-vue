@@ -1,5 +1,5 @@
 import {createRouter, createWebHashHistory} from 'vue-router'
-import {HomeView, LoginView, SocketComponent, GameView, TestComponent} from '@/components'
+import {HomeView, LoginView, SocketComponent, GameView} from '@/components'
 
 const router = createRouter({
 	history: createWebHashHistory(),
@@ -23,11 +23,6 @@ const router = createRouter({
 			path: '/game',
 			name: 'game',
 			component: GameView
-		},
-		{
-			path: '/test',
-			name: 'test',
-			component: TestComponent
 		}
 	]
 })
