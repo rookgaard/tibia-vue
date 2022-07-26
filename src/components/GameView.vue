@@ -50,6 +50,16 @@ let gameMap = new GameMap();
 let background, game, characters, messages;
 let imgMap = [];
 
+const simpleHash = str => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash &= hash; // Convert to 32bit integer
+  }
+  return new Uint32Array([hash])[0].toString(36);
+};
+
 function drawSprite(canvas, item, left, top) {
   const width = item.data.width * 32;
   left -= width - 32;
@@ -84,17 +94,32 @@ function drawCreature(canvas, creature, left, top) {
     color = 'rgb(0, 192, 0)';
   }
 
-  const img = new Image();
-  img.src = 'https://outfit-images.ots.me/idleOutfits1092/outfit.php?id=' + outfit.lookType + '&addons=' + outfit.addons + '&head=' + outfit.head + '&body=' + outfit.body + '&legs=' + outfit.legs + '&feet=' + outfit.feet + '&direction=' + (creature.data.direction + 1);
-  img.onload = function () {
+  const url = 'https://outfit-images.ots.me/idleOutfits1092/outfit.php?id=' + outfit.lookType + '&addons=' + outfit.addons + '&head=' + outfit.head + '&body=' + outfit.body + '&legs=' + outfit.legs + '&feet=' + outfit.feet + '&direction=' + (creature.data.direction + 1);
+  const urlHash = simpleHash(url);
+
+  if (imgMap[urlHash]) {
     canvas.drawImage(
-        img,
+        imgMap[urlHash],
         left - 32,
         top - 32,
         64,
         64
     );
+  } else {
+    const img = new Image();
+    img.src = url;
+    img.onload = function () {
+      canvas.drawImage(
+          img,
+          left - 32,
+          top - 32,
+          64,
+          64
+      );
+    }
+    imgMap[urlHash] = img;
   }
+
   messages.drawRect(left - 5, top - 10, 27, 4, 'black');
   const bar = Math.floor(creature.data.healthPercent / 4);
   messages.drawRect(left - 4, top - 9, bar, 2, color);
@@ -116,7 +141,7 @@ function drawMap() {
       for (const x in gameMap.things[z][y]) {
         for (const stackPos in gameMap.things[z][y][x]) {
           const thing = gameMap.things[z][y][x][stackPos];
-          const offset = [(thing.position.x - centralPos.x + 8) * 32, (thing.position.y - centralPos.y + 5) * 32];
+          const offset = [(thing.position.x - centralPos.x + 9) * 32, (thing.position.y - centralPos.y + 7) * 32];
           // console.log(thing, offset);
 
           if (thing.type === 'item') {
@@ -241,20 +266,10 @@ function parseBuffer(msg, length) {
 export default {
   name: 'GameView',
   sockets: {
-    connect() {
-      // console.log(this.$socket.id, 'socket connected');
-    },
-    error: function (data) {
-      console.log(data);
-    },
     message: function (data) {
       buffer = data.buffer;
       const msg = new BufferReader(data.buffer);
       const msgLength = msg.getUInt16();
-
-      if (msgLength > data.buffer.byteLength + 256) {
-        return;
-      }
 
       console.info('-------------------------------');
       console.log(msg, msgLength, data.buffer.byteLength);
