@@ -1,5 +1,5 @@
 import {Position} from '@/shared/position';
-import {Thing} from '@/shared/Thing';
+import {Thing} from '@/shared/thing';
 
 export class GameMap {
 	things: any[];
@@ -73,7 +73,7 @@ export class GameMap {
 		thing.stackPos = stackPos;
 
 		if (thing.type === 'creature') {
-			this.creatures[thing.data.id] = thing;
+			this.creatures[thing.id] = thing;
 		}
 
 		this.things[position.z][position.y][position.x].splice(stackPos, 0, thing);

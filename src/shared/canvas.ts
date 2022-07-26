@@ -14,6 +14,14 @@ export class Canvas {
 		this.context.imageSmoothingEnabled = false;
 	}
 
+	getWidth(): number {
+		return this.canvas.width;
+	}
+
+	getHeight(): number {
+		return this.canvas.height;
+	}
+
 	drawImage(img: HTMLImageElement, x: number, y: number, width: number, height: number): void {
 		this.context.drawImage(img, x, y, width ?? 32, height ?? 32);
 	}
